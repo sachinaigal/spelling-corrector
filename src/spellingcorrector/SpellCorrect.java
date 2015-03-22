@@ -19,9 +19,9 @@ public class SpellCorrect {
     private static HashMap<String, Integer> frequencyMap = new HashMap<String, Integer>();
     private static HashMap<String, String> test1Words = new HashMap<String, String>();
     private static HashMap<String, String> test2Words = new HashMap<String, String>();
-//    private static Set<String> printWords = new HashSet<String>(Arrays.asList("economtric", "embaras", "colate", "orentated", "unequivocaly", "generataed", "guidlines"));
+    private static Set<String> printWords = new HashSet<String>(Arrays.asList("economtric", "embaras", "colate", "orentated", "unequivocaly", "generataed", "guidlines"));
 //    private static Set<String> printWords = new HashSet<String>(Arrays.asList("reciet", "adres", "rember", "juse", "accesing"));
-    private static Set<String> printWords = new HashSet<String>(Arrays.asList("thay", "cleark", "wer", "bonas", "plesent")); // 'they' (4939)
+//    private static Set<String> printWords = new HashSet<String>(Arrays.asList("thay", "cleark", "wer", "bonas", "plesent")); // 'they' (4939)
 //    private static Set<String> printWords = new HashSet<String>(Arrays.asList("wonted", "planed", "forth", "et"));
 //    private static Set<String> printWords = new HashSet<String>(Arrays.asList("where", "latter", "advice")); // 'later' (116) 'were' (452)
 //    private static Set<String> printWords = new HashSet<String>(Arrays.asList("hown", "ther", "quies", "natior", "thear", "carrers")); // their (2955)
