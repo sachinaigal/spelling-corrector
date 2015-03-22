@@ -18,13 +18,6 @@ public class SpellCorrect {
     private static HashMap<String, Integer> nWords = new HashMap<String, Integer>();
     private static HashMap<String, String> test1Words = new HashMap<String, String>();
     private static HashMap<String, String> test2Words = new HashMap<String, String>();
-    //    private static Set<String> printWords = new HashSet<String>(Arrays.asList("economtric", "embaras", "colate", "orentated", "unequivocaly", "generataed", "guidlines"));
-//    private static Set<String> printWords = new HashSet<String>(Arrays.asList("reciet", "adres", "rember", "juse", "accesing"));
-//    private static Set<String> printWords = new HashSet<String>(Arrays.asList("thay", "cleark", "wer", "bonas", "plesent")); // 'they' (4939)
-//    private static Set<String> printWords = new HashSet<String>(Arrays.asList("wonted", "planed", "forth", "et")); 'set' (325)
-//    private static Set<String> printWords = new HashSet<String>(Arrays.asList("where", "latter", "advice")); // 'latter' (11); expected 'later' (116) ; where' (123); expected 'were' (452)
-//    private static Set<String> printWords = new HashSet<String>(Arrays.asList("hown", "ther", "quies", "natior", "thear", "carrers")); // 'the' (81031); expected 'their' (3956)
-//    private static Set<String> printWords = new HashSet<String>(Arrays.asList("aranging", "sumarys", "aurgument", "humor", "oranisation", "oranised"));
 //    private static Set<String> printWords = new HashSet<String>(Arrays.asList("*"));
     private static Set<String> printWords = new HashSet<String>();
 
@@ -68,7 +61,9 @@ public class SpellCorrect {
         return (integer != null ? integer : 1);
     }
 
-    // P(c) [language model] - get frequency of all alphabetic words (converted to lowercase)
+    /**
+     * P(c) [language model] - get frequency of all alphabetic words (converted to lowercase)
+     */
     public static void getWordFrequency() throws IOException {
         BufferedReader br = new BufferedReader(new FileReader(WORDS_FILE));
         String line;
@@ -78,21 +73,8 @@ public class SpellCorrect {
             Scanner scanner = new Scanner(line.toLowerCase()).useDelimiter(WORD_DELIM);
             while (scanner.hasNext()) {
                 String word = scanner.next();
-                // index only words with letters
-                boolean validWord = true;
-                int length = word.length();
-                for (int i = 0; i < length; i++) {
-                    char ch = word.charAt(i);
-                    if (ch < 'a' || ch > 'z') {
-                        validWord = false;
-                        break;
-                    }
-                }
-
-                if (validWord) {
-                    Integer currentFrequency = nWords.get(word);
-                    nWords.put(word, currentFrequency == null ? 2 : ++currentFrequency);
-                }
+                Integer currentFrequency = nWords.get(word);
+                nWords.put(word, currentFrequency == null ? 2 : ++currentFrequency);
             }
             scanner.close();
         }
