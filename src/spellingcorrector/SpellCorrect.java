@@ -15,7 +15,7 @@ public class SpellCorrect {
 
     public static final String WORD_DELIM = "[^a-z]+";
     public static String WORDS_FILE = "/home/sachin/dev/github/spellingcorrector/src/big.txt";
-    private static HashMap<String, Integer> frequencyMap = new HashMap<String, Integer>();
+    private static HashMap<String, Integer> nWords = new HashMap<String, Integer>();
     private static HashMap<String, String> test1Words = new HashMap<String, String>();
     private static HashMap<String, String> test2Words = new HashMap<String, String>();
     //    private static Set<String> printWords = new HashSet<String>(Arrays.asList("economtric", "embaras", "colate", "orentated", "unequivocaly", "generataed", "guidlines"));
@@ -25,6 +25,7 @@ public class SpellCorrect {
 //    private static Set<String> printWords = new HashSet<String>(Arrays.asList("where", "latter", "advice")); // 'latter' (11); expected 'later' (116) ; where' (123); expected 'were' (452)
 //    private static Set<String> printWords = new HashSet<String>(Arrays.asList("hown", "ther", "quies", "natior", "thear", "carrers")); // 'the' (81031); expected 'their' (3956)
 //    private static Set<String> printWords = new HashSet<String>(Arrays.asList("aranging", "sumarys", "aurgument", "humor", "oranisation", "oranised"));
+//    private static Set<String> printWords = new HashSet<String>(Arrays.asList("*"));
     private static Set<String> printWords = new HashSet<String>();
 
     public static void main(String[] args) throws IOException {
@@ -44,23 +45,21 @@ public class SpellCorrect {
             for(String testWord : testWords) {
                 n++;
                 String actual = correct(testWord);
-                if(expected.equals(actual)) {
-                    //System.out.println("correct(" + testWord + ") => " + actual);
-                } else  {
+                if (!expected.equals(actual)) {
                     bad++;
-                    if(printWords.contains(testWord)) {
-                        System.out.println("correct('" + testWord + "') => '" + actual + "' (" + smooth(frequencyMap.get(actual)) +
-                                "); expected '" + expected + "' (" + smooth(frequencyMap.get(expected)) + ")");
+                    if (printWords.contains("*") || printWords.contains(testWord)) {
+                        System.out.println("correct('" + testWord + "') => '" + actual + "' (" + smooth(nWords.get(actual)) +
+                                "); expected '" + expected + "' (" + smooth(nWords.get(expected)) + ")");
                     }
                 }
 
                 // unknown
-                if(frequencyMap.get(expected) == null) {
+                if (nWords.get(expected) == null) {
                     unknown++;
                 }
             }
         }
-//        System.out.println("coat: " + frequencyMap.get("coat"));
+
         System.out.println("\n{'bad': " + bad + ", 'bias': None, 'unknown': " + unknown +
                 ", 'secs': " + ((System.currentTimeMillis() - start) / (1000)) + ", 'pct': " + (int) (100.00 * (n - bad) / n) + ", 'n': " + n + "}");
     }
@@ -91,8 +90,8 @@ public class SpellCorrect {
                 }
 
                 if (validWord) {
-                    Integer currentFrequency = frequencyMap.get(word);
-                    frequencyMap.put(word, currentFrequency == null ? 2 : ++currentFrequency);
+                    Integer currentFrequency = nWords.get(word);
+                    nWords.put(word, currentFrequency == null ? 2 : ++currentFrequency);
                 }
             }
             scanner.close();
@@ -108,7 +107,7 @@ public class SpellCorrect {
         word = word.toLowerCase();
 
         // known word - no correction needed
-        if (frequencyMap.get(word) != null) {
+        if (nWords.get(word) != null) {
             return word;
         }
 
@@ -139,7 +138,7 @@ public class SpellCorrect {
         int max = 0;
         String bestCandidate = null;
         for (String candidate : candidates) {
-            Integer candidateFrequency = frequencyMap.get(candidate);
+            Integer candidateFrequency = nWords.get(candidate);
             if (candidateFrequency != null && candidateFrequency > max) {
                 max = candidateFrequency;
                 bestCandidate = candidate;
@@ -155,7 +154,7 @@ public class SpellCorrect {
         // deletion (remove one letter)
         for (int i = 0; i < length; i++) {
             String editedWord = word.substring(0, i) + word.substring(i + 1, length);
-            if (!keepOnlyKnown || frequencyMap.get(editedWord) != null) {
+            if (!keepOnlyKnown || nWords.get(editedWord) != null) {
                 candidates.add(editedWord);
             }
         }
@@ -168,7 +167,7 @@ public class SpellCorrect {
             wordCharArray[i + 1] = temp;
 
             String editedWord = new String(wordCharArray);
-            if (!keepOnlyKnown || frequencyMap.get(editedWord) != null) {
+            if (!keepOnlyKnown || nWords.get(editedWord) != null) {
                 candidates.add(editedWord);
             }
 
@@ -186,7 +185,7 @@ public class SpellCorrect {
                 wordCharArray[i] = ch;
 
                 String editedWord = new String(wordCharArray);
-                if (!keepOnlyKnown || frequencyMap.get(editedWord) != null) {
+                if (!keepOnlyKnown || nWords.get(editedWord) != null) {
                     candidates.add(editedWord);
                 }
 
@@ -196,10 +195,10 @@ public class SpellCorrect {
         }
 
         // insertion (add a letter)
-        for (int i = 0; i < length; i++) {
+        for (int i = 0; i <= length; i++) {
             for (char ch = 'a'; ch <= 'z'; ch++) {
-                String editedWord = word.substring(0, i) + ch + word.substring(i, length);
-                if (!keepOnlyKnown || frequencyMap.get(editedWord) != null) {
+                String editedWord = word.substring(0, i) + ch + word.substring(i);
+                if (!keepOnlyKnown || nWords.get(editedWord) != null) {
                     candidates.add(editedWord);
                 }
             }
