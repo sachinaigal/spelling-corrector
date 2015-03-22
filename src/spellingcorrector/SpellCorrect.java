@@ -3,7 +3,6 @@ package spellingcorrector;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Scanner;
@@ -14,18 +13,19 @@ import java.util.Set;
  */
 public class SpellCorrect {
 
-    public static final String WORD_DELIM = "[\\p{Punct}\\s]+";
+    public static final String WORD_DELIM = "[^a-z]+";
     public static String WORDS_FILE = "/home/sachin/dev/github/spellingcorrector/src/big.txt";
     private static HashMap<String, Integer> frequencyMap = new HashMap<String, Integer>();
     private static HashMap<String, String> test1Words = new HashMap<String, String>();
     private static HashMap<String, String> test2Words = new HashMap<String, String>();
-    private static Set<String> printWords = new HashSet<String>(Arrays.asList("economtric", "embaras", "colate", "orentated", "unequivocaly", "generataed", "guidlines"));
+    //    private static Set<String> printWords = new HashSet<String>(Arrays.asList("economtric", "embaras", "colate", "orentated", "unequivocaly", "generataed", "guidlines"));
 //    private static Set<String> printWords = new HashSet<String>(Arrays.asList("reciet", "adres", "rember", "juse", "accesing"));
 //    private static Set<String> printWords = new HashSet<String>(Arrays.asList("thay", "cleark", "wer", "bonas", "plesent")); // 'they' (4939)
-//    private static Set<String> printWords = new HashSet<String>(Arrays.asList("wonted", "planed", "forth", "et"));
-//    private static Set<String> printWords = new HashSet<String>(Arrays.asList("where", "latter", "advice")); // 'later' (116) 'were' (452)
-//    private static Set<String> printWords = new HashSet<String>(Arrays.asList("hown", "ther", "quies", "natior", "thear", "carrers")); // their (2955)
+//    private static Set<String> printWords = new HashSet<String>(Arrays.asList("wonted", "planed", "forth", "et")); 'set' (325)
+//    private static Set<String> printWords = new HashSet<String>(Arrays.asList("where", "latter", "advice")); // 'latter' (11); expected 'later' (116) ; where' (123); expected 'were' (452)
+//    private static Set<String> printWords = new HashSet<String>(Arrays.asList("hown", "ther", "quies", "natior", "thear", "carrers")); // 'the' (81031); expected 'their' (3956)
 //    private static Set<String> printWords = new HashSet<String>(Arrays.asList("aranging", "sumarys", "aurgument", "humor", "oranisation", "oranised"));
+    private static Set<String> printWords = new HashSet<String>();
 
     public static void main(String[] args) throws IOException {
         getWordFrequency();
@@ -36,38 +36,37 @@ public class SpellCorrect {
 
     public static void test(HashMap<String, String> testWordsMap) throws IOException {
         long start = System.currentTimeMillis();
-        int correctCount = 0;
-        int incorrectCount = 0;
-        int unknownCount = 0;
+        int n = 0;
+        int bad = 0;
+        int unknown = 0;
         for (String expected : testWordsMap.keySet()) {
-            // smoothing
-//            if(frequencyMap.get(expected) == null) {
-//                frequencyMap.put(expected, 1);
-//            }
-
             String[] testWords = testWordsMap.get(expected).split(" ");
             for(String testWord : testWords) {
+                n++;
                 String actual = correct(testWord);
                 if(expected.equals(actual)) {
-                    correctCount++;
                     //System.out.println("correct(" + testWord + ") => " + actual);
                 } else  {
-                    incorrectCount++;
+                    bad++;
                     if(printWords.contains(testWord)) {
-                        System.out.println("correct(" + testWord + ") => " + actual + " (" + frequencyMap.get(actual) +
-                                "); expected " + expected + " (" + frequencyMap.get(expected) + ")");
+                        System.out.println("correct('" + testWord + "') => '" + actual + "' (" + smooth(frequencyMap.get(actual)) +
+                                "); expected '" + expected + "' (" + smooth(frequencyMap.get(expected)) + ")");
                     }
                 }
 
                 // unknown
                 if(frequencyMap.get(expected) == null) {
-                    unknownCount++;
+                    unknown++;
                 }
             }
         }
 //        System.out.println("coat: " + frequencyMap.get("coat"));
-        System.out.println("\ncorrect: " + correctCount + ", incorrect: " + incorrectCount + ", unknown: " + unknownCount + ", pct: " + ((double)correctCount/(correctCount + incorrectCount)) +
-                ", Time: " + ((System.currentTimeMillis() - start) / (1000)) + " seconds\n");
+        System.out.println("\n{'bad': " + bad + ", 'bias': None, 'unknown': " + unknown +
+                ", 'secs': " + ((System.currentTimeMillis() - start) / (1000)) + ", 'pct': " + (int) (100.00 * (n - bad) / n) + ", 'n': " + n + "}");
+    }
+
+    public static Integer smooth(Integer integer) {
+        return (integer != null ? integer : 1);
     }
 
     // P(c) [language model] - get frequency of all alphabetic words (converted to lowercase)
@@ -93,7 +92,7 @@ public class SpellCorrect {
 
                 if (validWord) {
                     Integer currentFrequency = frequencyMap.get(word);
-                    frequencyMap.put(word, currentFrequency == null ? 1 : ++currentFrequency);
+                    frequencyMap.put(word, currentFrequency == null ? 2 : ++currentFrequency);
                 }
             }
             scanner.close();
